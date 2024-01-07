@@ -17,7 +17,6 @@ const getModelBufferFromS3 = async () => {
   try {
     const s3response = await s3client.send(command);
     const bytearray = await s3response.Body?.transformToByteArray();
-    console.log(bytearray);
 
     if (!bytearray) {
       throw Error("Couldn't convert model to bytearray");
@@ -29,9 +28,10 @@ const getModelBufferFromS3 = async () => {
   }
 };
 
-export default async function GET(request: Request) {
+export async function GET(request: Request) {
   try {
     const modelBuffer = await getModelBufferFromS3();
+    console.log("Loaded model buffer from S3!");
 
     return new Response(modelBuffer, {
       headers: {

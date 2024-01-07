@@ -1,3 +1,7 @@
 export default function Home() {
-  return <button>Train</button>;
+  return (
+    <>
+      <a href="/api/s3-get-model">Download model</a>
+    </>
+  );
 }
