@@ -7,7 +7,7 @@ Modal : https://modal.com
 
 DEV COMMANDS:
 
-Test function locally:
+Test function locally (remove the @web_endpoint() decorator):
 
     modal run main.py
 
