@@ -22,7 +22,7 @@ Deploy function to persistent endpoint:
 
 import modal
 from modal import Image, web_endpoint
-from typing import Dict
+from input_types import Config
 
 from image_classification.main import image_classification_model
 
@@ -48,18 +48,9 @@ Serverless function
 """
 @stub.function(gpu="any", image=tf_image, secret=modal.Secret.from_name("my-aws-secret"))
 @web_endpoint(method="POST")
-def run_model(config: Dict):
+def run_model(config: Config):
 
     try:
-        # Extract arguments
-        dataset_arg = config["dataset"]
-        framework_arg = config["framework"]
-        task_arg = config["task"]
-        layers_arg = config["layers"]
-        epochs_arg = config["epochs"]
-        lr_arg = config["learning_rate"]
-        batch_size_arg = config["batch_size"]
-
         print("CONFIGURATION")
         print(config)
 
@@ -76,9 +67,9 @@ def run_model(config: Dict):
         else:
             print("No GPU available.")
 
-        if task_arg.lower() == "image classification":
+        if config.task.lower() == "image classification":
             print("IMAGE CLASSIFICATION")
-            model = image_classification_model(dataset_arg, layers_arg, epochs_arg, batch_size_arg, lr_arg)
+            model = image_classification_model(config)
 
         # Save model to local
         print("Saving model...")
@@ -100,6 +91,7 @@ def run_model(config: Dict):
         }
 
     except Exception as e:
+        print(e)
         return {
             "status": 500,
             "message": e
