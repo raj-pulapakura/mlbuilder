@@ -1,0 +1,10 @@
+Tasks:
+- Image Classification
+- Text Classification
+
+Frameworks:
+- TensorFlow
+- PyTorch
+
+Datasets:
+- MNIST

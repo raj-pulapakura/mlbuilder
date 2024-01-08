@@ -22,6 +22,9 @@ Deploy function to persistent endpoint:
 
 import modal
 from modal import Image, web_endpoint
+from typing import Dict
+
+from image_classification.main import image_classification_model
 
 # Custom image to load libraries
 tf_image = Image.debian_slim().pip_install("tensorflow[and-cuda]", "tensorflow_datasets", "boto3")
@@ -44,82 +47,63 @@ Serverless function
 
 """
 @stub.function(gpu="any", image=tf_image, secret=modal.Secret.from_name("my-aws-secret"))
-@web_endpoint()
-def run_model():
+@web_endpoint(method="POST")
+def run_model(config: Dict):
 
-    # Import libraries
-    import tensorflow as tf
-    import tensorflow_datasets as tfds
-    import boto3
+    try:
+        # Extract arguments
+        dataset_arg = config["dataset"]
+        framework_arg = config["framework"]
+        task_arg = config["task"]
+        layers_arg = config["layers"]
+        epochs_arg = config["epochs"]
+        lr_arg = config["learning_rate"]
+        batch_size_arg = config["batch_size"]
 
-    # Check for GPU
-    physical_devices = tf.config.list_physical_devices('GPU')
-    if len(physical_devices) > 0:
-        tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        print("GPU available and memory growth configured.")
-    else:
-        print("No GPU available.")
+        print("CONFIGURATION")
+        print(config)
 
-    # Load MNIST dataset
-    (ds_train, ds_test), ds_info = tfds.load(
-        'mnist',
-        split=['train', 'test'],
-        shuffle_files=True,
-        as_supervised=True,
-        with_info=True,
-    )
+        # Import libraries
+        import tensorflow as tf
+        import tensorflow_datasets as tfds
+        import boto3
 
-    # Process, Shuffle, Batch
-    def normalize_img(image, label):
-        """Normalizes images: `uint8` -> `float32`."""
-        return tf.cast(image, tf.float32) / 255., label
+        # Check for GPU
+        physical_devices = tf.config.list_physical_devices('GPU')
+        if len(physical_devices) > 0:
+            tf.config.experimental.set_memory_growth(physical_devices[0], True)
+            print("GPU available and memory growth configured.")
+        else:
+            print("No GPU available.")
 
-    ds_train = ds_train.map(
-        normalize_img, num_parallel_calls=tf.data.AUTOTUNE)
-    ds_train = ds_train.cache()
-    ds_train = ds_train.shuffle(ds_info.splits['train'].num_examples)
-    ds_train = ds_train.batch(128)
-    ds_train = ds_train.prefetch(tf.data.AUTOTUNE)
+        if task_arg.lower() == "image classification":
+            print("IMAGE CLASSIFICATION")
+            model = image_classification_model(dataset_arg, layers_arg, epochs_arg, batch_size_arg, lr_arg)
 
-    ds_test = ds_test.map(
-    normalize_img, num_parallel_calls=tf.data.AUTOTUNE)
-    ds_test = ds_test.batch(128)
-    ds_test = ds_test.cache()
-    ds_test = ds_test.prefetch(tf.data.AUTOTUNE)
+        # Save model to local
+        print("Saving model...")
+        MODEL_PATH = "tmp/model.h5"
+        model.save(MODEL_PATH)
+        print("Saved!")
 
-    # Define model
-    model = tf.keras.models.Sequential([
-    tf.keras.layers.Flatten(input_shape=(28, 28)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(10)
-    ])
+        # Upload model to s3
+        print("Uploading to S3...")
+        BUCKET_NAME = "mlbuilder-testbucket"
+        MODEL_S3_FILE_NAME = "model.h5"
+        s3_client = boto3.client('s3')
+        s3_client.upload_file(MODEL_PATH, BUCKET_NAME, MODEL_S3_FILE_NAME)
+        print("Uploaded")
 
-    # Compile
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(0.001),
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-        metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
-    )
+        return {
+            "status": 200,
+            "message": "model trained and uploaded to s3"
+        }
 
-    # Train
-    model.fit(
-        ds_train,
-        epochs=10,
-        validation_data=ds_test,
-    )
-
-    # Save model to local
-    MODEL_PATH = "tmp/model.h5"
-    model.save(MODEL_PATH)
-
-    # Upload model to s3
-    BUCKET_NAME = "mlbuilder-testbucket"
-    MODEL_S3_FILE_NAME = "model.h5"
-    s3_client = boto3.client('s3')
-    s3_client.upload_file(MODEL_PATH, BUCKET_NAME, MODEL_S3_FILE_NAME)
-
-    return {"body": "Success!"}
-
+    except Exception as e:
+        return {
+            "status": 500,
+            "message": e
+        }
 
 """
 For local testing, run:
