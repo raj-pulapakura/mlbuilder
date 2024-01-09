@@ -18,7 +18,7 @@ def image_classification_model(config: Config):
     input_shape = ds_info.features["image"].shape
     num_classes = ds_info.features["label"].num_classes
 
-    # inputs are of variable size
+    # Resize images if inputs are of variable size
     if input_shape[0] == None:
         resize = True
         input_shape = (256, 256, input_shape[2])
@@ -26,7 +26,6 @@ def image_classification_model(config: Config):
         resize = False
 
     # Process, Shuffle, Batch
-
     ds_train = ds_train.map(
         normalize_image, num_parallel_calls=tf.data.AUTOTUNE)
     if resize:

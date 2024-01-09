@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional, Tuple
+from typing import List
 
 class Layer(BaseModel):
     type: str
@@ -13,7 +13,7 @@ class ConvLayer(Layer):
     activation: str
 
 class PoolLayer(Layer):
-    type: str
+    type: str = "pool"
     pool_size: int
     strides: int
     padding: str
@@ -38,6 +38,6 @@ class Config(BaseModel):
     framework: str
     task: str
     epochs: int
-    learning_rate: int
+    learning_rate: float
     batch_size: int
     layers: List[ConvLayer | PoolLayer | Dropout | BatchNorm | Flatten | Dense]

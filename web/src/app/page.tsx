@@ -1,106 +1,31 @@
 "use client";
 
-import Dropdown from "@/components/Dropdown";
+import Dropdown from "@/components/Inputs/Dropdown";
 import { useEffect, useState } from "react";
 import { CloudFuncData } from "./api/train-model/route";
 import { useRouter } from "next/navigation";
-
-const taskOptions = [
-  "Image Classification",
-  "Text Classification",
-  "Object Detection",
-];
-
-const frameworkOptions = ["TensorFlow", "PyTorch"];
-
-const datasetOptions = {
-  TensorFlow: ["MNIST", "fashion_mnist", "caltech101"],
-  PyTorch: [""],
-};
-
-const learningRateOptions = [0.0001, 0.001, 0.01, 0.1, 1, 10];
-
-const epochOptions = [1, 10, 20, 30, 40, 50, 100];
-
-const batchSizeOptions = [1, 2, 4, 8, 16, 32, 64, 128, 256];
+import {
+  taskOptions,
+  frameworkOptions,
+  datasetOptions,
+  learningRateOptions,
+  epochOptions,
+  batchSizeOptions,
+} from "@/data/dropdownOptions";
+import Code from "@/components/Code";
+import defaultConfig from "@/data/defaultConfig";
+import { Config } from "@/types/Config";
 
 export default function HomePage() {
-  const [task, setTask] = useState("Image Classification");
-  const [framework, setFramework] = useState("TensorFlow");
-  const [dataset, setDataset] = useState("MNIST");
-  const [learningRate, setLearningRate] = useState(0.001);
-  const [epochs, setEpochs] = useState(10);
-  const [batchSize, setBatchSize] = useState(128);
+  const [config, setConfig] = useState<Config>(defaultConfig);
 
   const router = useRouter();
 
   useEffect(() => {
-    console.log(task);
-    console.log(framework);
-    console.log(dataset);
-    console.log(learningRate);
-    console.log(epochs);
-    console.log(batchSize);
-  }, [task, framework, dataset, learningRate, epochs, batchSize]);
+    console.log(config);
+  }, [config]);
 
   const train = () => {
-    const config = {
-      task,
-      framework,
-      dataset,
-      learning_rate: learningRate,
-      epochs,
-      batch_size: batchSize,
-      layers: [
-        {
-          type: "conv",
-          filters: 16,
-          kernel_size: 3,
-          strides: 1,
-          padding: "valid",
-          activation: "relu",
-        },
-        {
-          type: "pool",
-          pool_size: 2,
-          strides: 2,
-          padding: "valid",
-        },
-        {
-          type: "conv",
-          filters: 32,
-          kernel_size: 3,
-          strides: 1,
-          padding: "valid",
-          activation: "relu",
-        },
-        {
-          type: "pool",
-          pool_size: 2,
-          strides: 2,
-          padding: "valid",
-        },
-        {
-          type: "conv",
-          filters: 64,
-          kernel_size: 3,
-          strides: 1,
-          padding: "valid",
-          activation: "relu",
-        },
-        {
-          type: "pool",
-          pool_size: 2,
-          strides: 2,
-          padding: "valid",
-        },
-
-        {
-          type: "flatten",
-        },
-      ],
-    };
-
     console.log("API Request Sent!");
 
     fetch("/api/train-model", {
@@ -125,54 +50,205 @@ export default function HomePage() {
       <button className="bg-slate-100" onClick={train}>
         Train
       </button>
-      <section className="grid grid-cols-2 gap-5">
-        <Dropdown
-          name="task"
-          options={taskOptions}
-          value={task}
-          onChange={(event) => setTask(event.target.value)}
-        />
-        <Dropdown
-          name="framework"
-          options={frameworkOptions}
-          value={framework}
-          onChange={(event) => setFramework(event.target.value)}
-        />
-        <Dropdown
-          name="dataset"
-          options={
-            framework == "TensorFlow"
-              ? datasetOptions.TensorFlow
-              : datasetOptions.PyTorch
-          }
-          value={dataset}
-          onChange={(event) => setDataset(event.target.value)}
-        />
-      </section>
-      <h1 className="mt-10">Numbers</h1>
-      <section className="grid grid-cols-2 gap-5">
-        <Dropdown
-          name="learning rate"
-          title="Learning Rate"
-          options={learningRateOptions}
-          value={learningRate}
-          onChange={(event) => setLearningRate(parseFloat(event.target.value))}
-        />
-        <Dropdown
-          name="epoch"
-          title="Epochs"
-          options={epochOptions}
-          value={epochs}
-          onChange={(event) => setEpochs(parseInt(event.target.value))}
-        />
-        <Dropdown
-          name="batch size"
-          title="Batch Size"
-          options={batchSizeOptions}
-          value={batchSize}
-          onChange={(event) => setBatchSize(parseInt(event.target.value))}
-        />
-      </section>
+      <div className="grid grid-cols-2">
+        <div>
+          {/* task, framework dataset */}
+          <section className="grid grid-cols-2 gap-5">
+            <Dropdown
+              name="task"
+              options={taskOptions}
+              value={config.task}
+              onChange={(event) =>
+                setConfig({ ...config, task: event.target.value })
+              }
+            />
+            <Dropdown
+              name="framework"
+              options={frameworkOptions}
+              value={config.framework}
+              onChange={(event) =>
+                setConfig({ ...config, framework: event.target.value })
+              }
+            />
+            <Dropdown
+              name="dataset"
+              options={
+                config.framework == "TensorFlow"
+                  ? datasetOptions.TensorFlow
+                  : datasetOptions.PyTorch
+              }
+              value={config.dataset}
+              onChange={(event) =>
+                setConfig({ ...config, dataset: event.target.value })
+              }
+            />
+          </section>
+          {/* learning rate, epochs, batch size, */}
+          <section className="grid grid-cols-2 gap-5">
+            <Dropdown
+              name="learning rate"
+              title="Learning Rate"
+              options={learningRateOptions}
+              value={config.learning_rate}
+              onChange={(event) =>
+                setConfig({
+                  ...config,
+                  learning_rate: parseFloat(event.target.value),
+                })
+              }
+            />
+            <Dropdown
+              name="epoch"
+              title="Epochs"
+              options={epochOptions}
+              value={config.epochs}
+              onChange={(event) =>
+                setConfig({ ...config, epochs: parseInt(event.target.value) })
+              }
+            />
+            <Dropdown
+              name="batch size"
+              title="Batch Size"
+              options={batchSizeOptions}
+              value={config.batch_size}
+              onChange={(event) =>
+                setConfig({
+                  ...config,
+                  batch_size: parseInt(event.target.value),
+                })
+              }
+            />
+          </section>
+          {/* layers */}
+          <h1>Layers</h1>
+          <section>
+            {config.layers.map((layer, index) => {
+              switch (layer.type) {
+                case "conv":
+                  return (
+                    <div className="flex">
+                      <Dropdown
+                        name="filters"
+                        title="filters"
+                        options={[16, 32, 64, 128, 256, 512]}
+                        value={layer.filters}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.filters = parseInt(event.target.value);
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="kernel size"
+                        title="kernel size"
+                        options={[1, 2, 3, 4, 5, 6, 7]}
+                        value={layer.kernel_size}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.kernel_size = parseInt(
+                            event.target.value
+                          );
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="strides"
+                        title="strides"
+                        options={[1, 2, 3, 4]}
+                        value={layer.strides}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.strides = parseInt(event.target.value);
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="padding"
+                        title="padding"
+                        options={["valid", "same"]}
+                        value={layer.padding}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.padding = event.target.value;
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="activation"
+                        title="activation"
+                        options={["sigmoid", "relu", "tanh"]}
+                        value={layer.activation}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.activation = event.target.value;
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                    </div>
+                  );
+                case "pool":
+                  return (
+                    <div className="flex">
+                      <Dropdown
+                        name="pool size"
+                        title="pool size"
+                        options={[1, 2, 3, 4, 5, 6, 7]}
+                        value={layer.pool_size}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.pool_size = parseInt(event.target.value);
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="strides"
+                        title="strides"
+                        options={[1, 2, 3, 4]}
+                        value={layer.strides}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.strides = parseInt(event.target.value);
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                      <Dropdown
+                        name="padding"
+                        title="padding"
+                        options={["valid", "same"]}
+                        value={layer.padding}
+                        onChange={(event) => {
+                          let updatedLayer = { ...layer };
+                          updatedLayer.padding = event.target.value;
+                          let layers = [...config.layers];
+                          layers[index] = updatedLayer;
+                          setConfig({ ...config, layers });
+                        }}
+                      />
+                    </div>
+                  );
+                default:
+                  return <></>;
+              }
+            })}
+          </section>
+        </div>
+
+        <Code config={config} setConfig={setConfig} />
+      </div>
     </main>
   );
 }
