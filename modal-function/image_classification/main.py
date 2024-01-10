@@ -1,5 +1,6 @@
 from .helpers import normalize_image, resize_image
 from input_types import Config
+from add_layers import add_layers
 
 def image_classification_model(config: Config):
 
@@ -7,6 +8,7 @@ def image_classification_model(config: Config):
     import tensorflow_datasets as tfds
 
     # Load dataset
+    print("downloading dataset...")
     (ds_train, ds_test), ds_info = tfds.load(
         config.dataset,
         split=['train', 'test'],
@@ -19,12 +21,14 @@ def image_classification_model(config: Config):
     num_classes = ds_info.features["label"].num_classes
 
     # Resize images if inputs are of variable size
+    print("resizing")
     if input_shape[0] == None:
         resize = True
         input_shape = (256, 256, input_shape[2])
     else:
         resize = False
 
+    print("processing")
     # Process, Shuffle, Batch
     ds_train = ds_train.map(
         normalize_image, num_parallel_calls=tf.data.AUTOTUNE)
@@ -43,41 +47,20 @@ def image_classification_model(config: Config):
     ds_test = ds_test.cache()
     ds_test = ds_test.prefetch(tf.data.AUTOTUNE)
 
+    print("building model")
     # Define model
     model = tf.keras.models.Sequential()
 
     # Define input layer
     model.add(tf.keras.layers.InputLayer(input_shape=input_shape))
 
-    # Load layers
-    for i, layer in enumerate(config.layers):
-        if layer.type == "conv":
-            filters = layer.filters or 16
-            kernel_size = layer.kernel_size or 3
-            strides = layer.strides or 1
-            padding = layer.padding or "valid"
-            activation = layer.activation or None
-            model.add(tf.keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, padding=padding, activation=activation))
-        elif layer.type == "pool":
-            pool_size = layer.pool_size or 2
-            strides = layer.strides or None
-            padding = layer.padding or "valid"
-            model.add(tf.keras.layers.MaxPooling2D(pool_size=pool_size, strides=strides, padding=padding))
-        elif layer.type == "dropout":
-            rate = layer.rate or 0.5
-            model.add(tf.keras.layers.Dropout(rate=rate))
-        elif layer.type == "batchnorm":
-            model.add(tf.keras.layers.BatchNormalization())
-        elif layer.type == "flatten":
-            model.add(tf.keras.layers.Flatten())
-        elif layer.type == "dense":
-            units = layer.units or 10
-            activation = layer.activation or None
-            model.add(tf.keras.layers.Dense(units=units, activation=activation))
+    # Add layers
+    model = add_layers(model, config)
 
     # Add classification layer
     model.add(tf.keras.layers.Dense(units=num_classes, activation="softmax"))
 
+    print("training")
     # Compile
     model.compile(
         optimizer=tf.keras.optimizers.Adam(config.learning_rate or 0.01), # learning rate

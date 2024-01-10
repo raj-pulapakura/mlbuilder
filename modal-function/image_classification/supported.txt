@@ -1,3 +1,4 @@
 MNIST
 fashion_mnist
 caltech101
+cifar10

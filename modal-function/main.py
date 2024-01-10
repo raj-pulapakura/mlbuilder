@@ -25,6 +25,7 @@ from modal import Image, web_endpoint
 from input_types import Config
 
 from image_classification.main import image_classification_model
+from text_classification.main import text_classification_model
 
 # Custom image to load libraries
 tf_image = Image.debian_slim().pip_install("tensorflow[and-cuda]", "tensorflow_datasets", "boto3")
@@ -46,7 +47,7 @@ Serverless function
     - Attaches web endpoint to serverless function
 
 """
-@stub.function(gpu="any", image=tf_image, secret=modal.Secret.from_name("my-aws-secret"))
+@stub.function(gpu="any", image=tf_image, secret=modal.Secret.from_name("my-aws-secret"), timeout=1000)
 @web_endpoint(method="POST")
 def run_model(config: Config):
 
@@ -55,9 +56,8 @@ def run_model(config: Config):
         print(config)
 
         # Import libraries
-        import tensorflow as tf
-        import tensorflow_datasets as tfds
         import boto3
+        import tensorflow as tf
 
         # Check for GPU
         physical_devices = tf.config.list_physical_devices('GPU')
@@ -71,26 +71,31 @@ def run_model(config: Config):
             print("IMAGE CLASSIFICATION")
             model = image_classification_model(config)
 
+        elif config.task.lower() == "text classification":
+            print("TEXT CLASSIFICATION")
+            model = text_classification_model(config)
+
         # Save model to local
         print("Saving model...")
-        MODEL_PATH = "tmp/model.h5"
+        MODEL_PATH = "model.keras"
         model.save(MODEL_PATH)
         print("Saved!")
 
         # Upload model to s3
         print("Uploading to S3...")
         BUCKET_NAME = "mlbuilder-testbucket"
-        MODEL_S3_FILE_NAME = "model.h5"
+        MODEL_S3_FILE_NAME = "model.keras"
         s3_client = boto3.client('s3')
         s3_client.upload_file(MODEL_PATH, BUCKET_NAME, MODEL_S3_FILE_NAME)
         print("Uploaded")
 
         return {
             "status": 200,
-            "message": "model trained and uploaded to s3"
+            "message": "model.keras trained and uploaded to s3"
         }
 
     except Exception as e:
+        print("ERROR")
         print(e)
         return {
             "status": 500,
