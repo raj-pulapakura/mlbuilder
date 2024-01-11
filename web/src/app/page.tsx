@@ -131,6 +131,7 @@ export default function HomePage() {
           <section>
             {config.layers.map((layer, index) => (
               <LayerInput
+                key={index}
                 layer={layer}
                 layerIndex={index}
                 config={config}

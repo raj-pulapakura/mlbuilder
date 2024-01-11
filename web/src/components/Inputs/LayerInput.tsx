@@ -7,6 +7,7 @@ import DenseLayerInput from "./layers/DenseLayerInput";
 import DropoutLayerInput from "./layers/DropoutLayerInput";
 import EmbeddingLayerInput from "./layers/EmbeddingLayerInput";
 import TextVectorizationLayerInput from "./layers/TextVectorizationLayerInput";
+import DeleteLayerButton from "./DeleteLayerButton";
 
 export interface LayerInputProps {
   layer: ConfigLayer;
@@ -92,5 +93,14 @@ export default function LayerInput({
       throw Error("invalid layer type");
   }
 
-  return <div className="flex">{inputComponent}</div>;
+  return (
+    <div className="flex">
+      <DeleteLayerButton
+        layerIndex={layerIndex}
+        config={config}
+        setConfig={setConfig}
+      />
+      {inputComponent}
+    </div>
+  );
 }
