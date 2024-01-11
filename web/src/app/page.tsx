@@ -11,10 +11,13 @@ import {
   learningRateOptions,
   epochOptions,
   batchSizeOptions,
-} from "@/data/dropdownOptions";
+} from "@/data/configOptions";
 import Code from "@/components/Code";
-import defaultConfig from "@/data/defaultConfig";
+import defaultConfig, { defaultLayers } from "@/data/defaultConfig";
 import { Config } from "@/types/Config";
+import ConvLayerInput from "@/components/Inputs/layers/ConvLayerInput";
+import PoolLayerInput from "@/components/Inputs/layers/PoolLayerInput";
+import LayerInput from "@/components/Inputs/LayerInput";
 
 export default function HomePage() {
   const [config, setConfig] = useState<Config>(defaultConfig);
@@ -66,6 +69,7 @@ export default function HomePage() {
                     datasetOptions[
                       config.framework as keyof typeof datasetOptions
                     ][value as keyof typeof datasetOptions.TensorFlow][0],
+                  layers: defaultLayers[value as keyof typeof defaultLayers],
                 })
               }
             />
@@ -125,130 +129,17 @@ export default function HomePage() {
           {/* layers */}
           <h1>Layers</h1>
           <section>
-            {config.layers.map((layer, index) => {
-              switch (layer.type) {
-                case "conv":
-                  return (
-                    <div className="flex" key={index}>
-                      <Dropdown
-                        name="filters"
-                        title="filters"
-                        options={[16, 32, 64, 128, 256, 512]}
-                        value={layer.filters}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.filters = parseInt(value);
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="kernel size"
-                        title="kernel size"
-                        options={[1, 2, 3, 4, 5, 6, 7]}
-                        value={layer.kernel_size}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.kernel_size = parseInt(value);
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="strides"
-                        title="strides"
-                        options={[1, 2, 3, 4]}
-                        value={layer.strides}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.strides = parseInt(value);
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="padding"
-                        title="padding"
-                        options={["valid", "same"]}
-                        value={layer.padding}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.padding = value;
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="activation"
-                        title="activation"
-                        options={["sigmoid", "relu", "tanh"]}
-                        value={layer.activation}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.activation = value;
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                    </div>
-                  );
-                case "pool":
-                  return (
-                    <div className="flex" key={index}>
-                      <Dropdown
-                        name="pool size"
-                        title="pool size"
-                        options={[1, 2, 3, 4, 5, 6, 7]}
-                        value={layer.pool_size}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.pool_size = parseInt(value);
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="strides"
-                        title="strides"
-                        options={[1, 2, 3, 4]}
-                        value={layer.strides}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.strides = parseInt(value);
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                      <Dropdown
-                        name="padding"
-                        title="padding"
-                        options={["valid", "same"]}
-                        value={layer.padding}
-                        onChange={(value) => {
-                          let updatedLayer = { ...layer };
-                          updatedLayer.padding = value;
-                          let layers = [...config.layers];
-                          layers[index] = updatedLayer;
-                          setConfig({ ...config, layers });
-                        }}
-                      />
-                    </div>
-                  );
-                default:
-                  return <></>;
-              }
-            })}
+            {config.layers.map((layer, index) => (
+              <LayerInput
+                layer={layer}
+                layerIndex={index}
+                config={config}
+                setConfig={setConfig}
+              />
+            ))}
           </section>
         </div>
-
-        <Code config={config} setConfig={setConfig} />
+        {/* <Code config={config} setConfig={setConfig} /> */}
       </div>
     </main>
   );

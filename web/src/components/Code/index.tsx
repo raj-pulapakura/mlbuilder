@@ -9,12 +9,11 @@ export interface CodeProps {
 }
 
 export default function Code({ config, setConfig }: CodeProps) {
-  return (
-    <SyntaxHighlighter className="max-h-96" language="python" style={dracula}>
-      {config.framework.toLowerCase() == "tensorflow"
-        ? config.task.toLowerCase() == "image classification" &&
-          config.dataset.toLowerCase() == "mnist"
-          ? `import tensorflow as tf
+  const codeToDisplay =
+    config.framework.toLowerCase() == "tensorflow"
+      ? config.task.toLowerCase() == "image classification" &&
+        config.dataset.toLowerCase() == "mnist"
+        ? `import tensorflow as tf
 import tensorflow_datasets as tfds  
 
 # Load dataset
@@ -75,7 +74,7 @@ model.add(tf.keras.layers.Dense(units=num_classes, activation="softmax"))
 
 # Compile
 model.compile(
-    optimizer=tf.keras.optimizers.Adam(config.learning_rate or 0.01), # learning rate
+    optimizer=tf.keras.optimizers.Adam(${config.learning_rate}), # learning rate
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
     metrics=[tf.keras.metrics.SparseCategoricalAccuracy()],
 )
@@ -87,8 +86,12 @@ model.fit(
     validation_data=ds_test,
 )
 `
-          : ``
-        : "pytorch code"}
+        : ``
+      : "pytorch code";
+
+  return (
+    <SyntaxHighlighter className="max-h-96" language="python" style={dracula}>
+      {codeToDisplay}
     </SyntaxHighlighter>
   );
 }

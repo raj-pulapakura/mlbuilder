@@ -36,3 +36,19 @@ export interface Dense extends Layer {
   units: number;
   activation: string;
 }
+
+export interface TextVectorization extends Layer {
+  type: "textvectorization";
+  max_tokens: number;
+  output_sequence_length: number;
+}
+
+export interface Embedding extends Layer {
+  type: "embedding";
+  input_dim: number;
+  output_dim: number;
+}
+
+export interface GlobalAveragePooling1D extends Layer {
+  type: "globalaveragepooling1d";
+}

@@ -11,7 +11,7 @@ const s3client = new S3Client({
 const getModelBufferFromS3 = async () => {
   const command = new GetObjectCommand({
     Bucket: process.env.BUCKET_NAME!,
-    Key: "model.h5",
+    Key: "model.keras",
   });
 
   try {
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     return new Response(modelBuffer, {
       headers: {
         "Content-Type": "application/octet-stream",
-        "Content-Disposition": "attachment; filename=model.h5",
+        "Content-Disposition": "attachment; filename=model.keras",
       },
     });
   } catch (error) {
