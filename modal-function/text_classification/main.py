@@ -1,4 +1,4 @@
-from input_types import Config
+from type_defs.config import Config
 from add_layers import add_layers
 
 def text_classification_model(config: Config):

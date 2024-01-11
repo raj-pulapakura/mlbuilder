@@ -22,10 +22,10 @@ Deploy function to persistent endpoint:
 
 import modal
 from modal import Image, web_endpoint
-from input_types import Config
 
 from image_classification.main import image_classification_model
 from text_classification.main import text_classification_model
+from type_defs.config import Config
 
 # Custom image to load libraries
 tf_image = Image.debian_slim().pip_install("tensorflow[and-cuda]", "tensorflow_datasets", "boto3")

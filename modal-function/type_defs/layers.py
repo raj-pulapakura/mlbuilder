@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from typing import List, Union, Literal
 
 class Layer(BaseModel):
@@ -46,11 +46,3 @@ class Embedding(Layer):
 class GlobalAveragePooling1D(Layer):
     type: Literal["globalaveragepooling1d"] = "globalaveragepooling1d"
 
-class Config(BaseModel):
-    dataset: str
-    framework: str
-    task: str
-    epochs: int
-    learning_rate: float
-    batch_size: int
-    layers: List[Union[ConvLayer, PoolLayer, Dropout, BatchNorm, Flatten, Dense, TextVectorization, Embedding, GlobalAveragePooling1D]]

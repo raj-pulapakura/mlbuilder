@@ -1,4 +1,4 @@
-from input_types import Config
+from type_defs.config import Config
 
 def add_layers(model, config: Config):
     import tensorflow as tf

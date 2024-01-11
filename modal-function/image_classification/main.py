@@ -1,5 +1,5 @@
 from .helpers import normalize_image, resize_image
-from input_types import Config
+from type_defs.config import Config
 from add_layers import add_layers
 
 def image_classification_model(config: Config):
