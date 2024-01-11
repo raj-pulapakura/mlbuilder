@@ -1,14 +1,16 @@
-export const taskOptions = [
-  "Image Classification",
-  "Text Classification",
-  "Object Detection",
-];
+export const taskOptions = ["Image Classification", "Text Classification"];
 
 export const frameworkOptions = ["TensorFlow", "PyTorch"];
 
 export const datasetOptions = {
-  TensorFlow: ["MNIST", "fashion_mnist", "caltech101"],
-  PyTorch: [""],
+  TensorFlow: {
+    "Image Classification": ["MNIST", "fashion_mnist", "caltech101"],
+    "Text Classification": ["imdb_reviews", "ag_news_subset"],
+  },
+  PyTorch: {
+    "Image Classification": [],
+    "Text Classification": [],
+  },
 };
 
 export const learningRateOptions = [0.0001, 0.001, 0.01, 0.1, 1, 10];

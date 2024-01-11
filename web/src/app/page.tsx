@@ -58,29 +58,32 @@ export default function HomePage() {
               name="task"
               options={taskOptions}
               value={config.task}
-              onChange={(event) =>
-                setConfig({ ...config, task: event.target.value })
+              onChange={(value) =>
+                setConfig({
+                  ...config,
+                  task: value,
+                  dataset:
+                    datasetOptions[
+                      config.framework as keyof typeof datasetOptions
+                    ][value as keyof typeof datasetOptions.TensorFlow][0],
+                })
               }
             />
             <Dropdown
               name="framework"
               options={frameworkOptions}
               value={config.framework}
-              onChange={(event) =>
-                setConfig({ ...config, framework: event.target.value })
-              }
+              onChange={(value) => setConfig({ ...config, framework: value })}
             />
             <Dropdown
               name="dataset"
               options={
-                config.framework == "TensorFlow"
-                  ? datasetOptions.TensorFlow
-                  : datasetOptions.PyTorch
+                datasetOptions[config.framework as keyof typeof datasetOptions][
+                  config.task as keyof typeof datasetOptions.TensorFlow
+                ]
               }
               value={config.dataset}
-              onChange={(event) =>
-                setConfig({ ...config, dataset: event.target.value })
-              }
+              onChange={(value) => setConfig({ ...config, dataset: value })}
             />
           </section>
           {/* learning rate, epochs, batch size, */}
@@ -90,10 +93,10 @@ export default function HomePage() {
               title="Learning Rate"
               options={learningRateOptions}
               value={config.learning_rate}
-              onChange={(event) =>
+              onChange={(value) =>
                 setConfig({
                   ...config,
-                  learning_rate: parseFloat(event.target.value),
+                  learning_rate: parseFloat(value),
                 })
               }
             />
@@ -102,8 +105,8 @@ export default function HomePage() {
               title="Epochs"
               options={epochOptions}
               value={config.epochs}
-              onChange={(event) =>
-                setConfig({ ...config, epochs: parseInt(event.target.value) })
+              onChange={(value) =>
+                setConfig({ ...config, epochs: parseInt(value) })
               }
             />
             <Dropdown
@@ -111,10 +114,10 @@ export default function HomePage() {
               title="Batch Size"
               options={batchSizeOptions}
               value={config.batch_size}
-              onChange={(event) =>
+              onChange={(value) =>
                 setConfig({
                   ...config,
-                  batch_size: parseInt(event.target.value),
+                  batch_size: parseInt(value),
                 })
               }
             />
@@ -126,15 +129,15 @@ export default function HomePage() {
               switch (layer.type) {
                 case "conv":
                   return (
-                    <div className="flex">
+                    <div className="flex" key={index}>
                       <Dropdown
                         name="filters"
                         title="filters"
                         options={[16, 32, 64, 128, 256, 512]}
                         value={layer.filters}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.filters = parseInt(event.target.value);
+                          updatedLayer.filters = parseInt(value);
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -145,11 +148,9 @@ export default function HomePage() {
                         title="kernel size"
                         options={[1, 2, 3, 4, 5, 6, 7]}
                         value={layer.kernel_size}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.kernel_size = parseInt(
-                            event.target.value
-                          );
+                          updatedLayer.kernel_size = parseInt(value);
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -160,9 +161,9 @@ export default function HomePage() {
                         title="strides"
                         options={[1, 2, 3, 4]}
                         value={layer.strides}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.strides = parseInt(event.target.value);
+                          updatedLayer.strides = parseInt(value);
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -173,9 +174,9 @@ export default function HomePage() {
                         title="padding"
                         options={["valid", "same"]}
                         value={layer.padding}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.padding = event.target.value;
+                          updatedLayer.padding = value;
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -186,9 +187,9 @@ export default function HomePage() {
                         title="activation"
                         options={["sigmoid", "relu", "tanh"]}
                         value={layer.activation}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.activation = event.target.value;
+                          updatedLayer.activation = value;
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -198,15 +199,15 @@ export default function HomePage() {
                   );
                 case "pool":
                   return (
-                    <div className="flex">
+                    <div className="flex" key={index}>
                       <Dropdown
                         name="pool size"
                         title="pool size"
                         options={[1, 2, 3, 4, 5, 6, 7]}
                         value={layer.pool_size}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.pool_size = parseInt(event.target.value);
+                          updatedLayer.pool_size = parseInt(value);
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -217,9 +218,9 @@ export default function HomePage() {
                         title="strides"
                         options={[1, 2, 3, 4]}
                         value={layer.strides}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.strides = parseInt(event.target.value);
+                          updatedLayer.strides = parseInt(value);
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });
@@ -230,9 +231,9 @@ export default function HomePage() {
                         title="padding"
                         options={["valid", "same"]}
                         value={layer.padding}
-                        onChange={(event) => {
+                        onChange={(value) => {
                           let updatedLayer = { ...layer };
-                          updatedLayer.padding = event.target.value;
+                          updatedLayer.padding = value;
                           let layers = [...config.layers];
                           layers[index] = updatedLayer;
                           setConfig({ ...config, layers });

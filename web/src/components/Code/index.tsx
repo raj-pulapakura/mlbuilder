@@ -9,7 +9,6 @@ export interface CodeProps {
 }
 
 export default function Code({ config, setConfig }: CodeProps) {
-  console.log(config.layers);
   return (
     <SyntaxHighlighter className="max-h-96" language="python" style={dracula}>
       {config.framework.toLowerCase() == "tensorflow"
